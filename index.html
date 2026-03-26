@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Velveet — Your Private Media Library</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Syne:wght@400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <style>
+    /* ── Design tokens ───────────────────────────────────── */
+    :root {
+      --color-bg:         #0a0808;
+      --color-surface-1:  #120f0f;
+      --color-surface-2:  #1c1717;
+      --color-surface-3:  #261f1f;
+      --color-surface-4:  #302828;
+      --color-border:          rgba(200,150,130,0.12);
+      --color-border-hover:    rgba(200,150,130,0.28);
+      --color-accent:          #c8392b;
+      --color-accent-hover:    #d9614f;
+      --color-accent-sub:      #e8b4a0;
+      --color-accent-ghost:    rgba(200,57,43,0.12);
+      --color-accent-glow:     rgba(200,57,43,0.22);
+      --color-text-primary:    #f0ebe8;
+      --color-text-secondary:  #a09590;
+      --color-text-tertiary:   #5a4f4c;
+      --color-gold:   #c9a96e;
+      --color-teal:   #4a9e8e;
+      --color-blue:   #4a72c8;
+      --color-green:  #6ab04c;
+      --color-pink:   #c86496;
+      --font-display: "Cormorant Garamond", Georgia, serif;
+      --font-ui:      "Syne", sans-serif;
+      --font-mono:    "DM Mono", "Courier New", monospace;
+      --radius-sm:   6px;
+      --radius-md:  10px;
+      --radius-lg:  14px;
+      --radius-xl:  20px;
+      --radius-pill: 999px;
+      --shadow-md:  0 8px 24px rgba(0,0,0,0.4);
+      --shadow-lg:  0 16px 48px rgba(0,0,0,0.5);
+      --shadow-glow: 0 0 32px rgba(200,57,43,0.3);
+      --ease-ui:    cubic-bezier(0.2,0,0,1);
+      --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    /* ── Reset ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text-primary);
+      font-family: var(--font-ui);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ── Utilities ───────────────────────────────────────── */
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-accent-sub);
+    }
+    .material-symbols-rounded {
+      font-family: "Material Symbols Rounded";
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+      user-select: none;
+    }
+
+    /* ── Animations ──────────────────────────────────────── */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes glow-pulse {
+      0%, 100% { opacity: 0.6; }
+      50%       { opacity: 1; }
+    }
+    .fade-up { animation: fade-up 0.6s var(--ease-ui) both; }
+    .fade-up-1 { animation-delay: 0.05s; }
+    .fade-up-2 { animation-delay: 0.12s; }
+    .fade-up-3 { animation-delay: 0.20s; }
+    .fade-up-4 { animation-delay: 0.28s; }
+    .fade-up-5 { animation-delay: 0.36s; }
+
+    /* ── Nav ─────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10,8,8,0.82);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+    }
+    .nav-logo span { color: var(--color-accent); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-link {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      transition: color 0.2s var(--ease-ui), background 0.2s var(--ease-ui);
+    }
+    .nav-link:hover {
+      color: var(--color-text-primary);
+      background: var(--color-surface-3);
+    }
+    .nav-cta {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      background: var(--color-accent);
+      padding: 7px 18px;
+      border-radius: var(--radius-pill);
+      transition: background 0.2s var(--ease-ui), box-shadow 0.2s var(--ease-ui);
+    }
+    .nav-cta:hover {
+      background: var(--color-accent-hover);
+      box-shadow: var(--shadow-glow);
+    }
+
+    /* ── Hero ────────────────────────────────────────────── */
+    #hero {
+      padding-top: 140px;
+      padding-bottom: 100px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg-glow {
+      position: absolute;
+      top: -120px; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 600px;
+      background: radial-gradient(ellipse at center, rgba(200,57,43,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      animation: glow-pulse 6s ease-in-out infinite;
+    }
+    .hero-content { position: relative; text-align: center; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--color-accent-ghost);
+      border: 1px solid rgba(200,57,43,0.25);
+      border-radius: var(--radius-pill);
+      padding: 5px 14px;
+      margin-bottom: 28px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--color-accent-sub);
+    }
+    .hero-badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      animation: glow-pulse 2s ease-in-out infinite;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(52px, 7vw, 88px);
+      font-weight: 300;
+      letter-spacing: -0.04em;
+      line-height: 1.0;
+      color: var(--color-text-primary);
+      margin-bottom: 20px;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--color-accent-sub);
+    }
+    .hero-subtitle {
+      font-size: 17px;
+      color: var(--color-text-secondary);
+      max-width: 520px;
+      margin: 0 auto 44px;
+      line-height: 1.65;
+    }
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: var(--radius-pill);
+      padding: 12px 26px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.22s var(--ease-ui);
+    }
+    .btn-primary {
+      background: var(--color-accent);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--color-accent-hover);
+      box-shadow: var(--shadow-glow);
+      transform: translateY(-1px);
+    }
+    .btn-ghost {
+      background: var(--color-surface-3);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+    .btn-ghost:hover {
+      background: var(--color-surface-4);
+      color: var(--color-text-primary);
+      border-color: var(--color-border-hover);
+    }
+    .hero-meta {
+      margin-top: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .hero-stat {
+      text-align: center;
+    }
+    .hero-stat-value {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+    }
+    .hero-stat-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--color-text-tertiary);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .hero-divider {
+      width: 1px; height: 32px;
+      background: var(--color-border);
+    }
+
+    /* ── Section shared ──────────────────────────────────── */
+    section { padding: 96px 0; }
+    section + section { border-top: 1px solid var(--color-border); }
+    .section-header {
+      margin-bottom: 56px;
+    }
+    .section-header .eyebrow { margin-bottom: 12px; }
+    h2 {
+      font-family: var(--font-display);
+      font-size: clamp(30px, 3.5vw, 44px);
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--color-text-primary);
+      margin-bottom: 14px;
+    }
+    .section-desc {
+      font-size: 15px;
+      color: var(--color-text-secondary);
+      max-width: 540px;
+      line-height: 1.65;
+    }
+
+    /* ── Features ────────────────────────────────────────── */
+    #features .section-header { text-align: center; }
+    #features .section-header .section-desc { margin: 0 auto; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+    .feature-card {
+      background: var(--color-surface-1);
+      padding: 32px 28px;
+      transition: background 0.22s var(--ease-ui);
+      position: relative;
+    }
+    .feature-card:hover { background: var(--color-surface-2); }
+    .feature-icon {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-md);
+      background: var(--color-accent-ghost);
+      border: 1px solid rgba(200,57,43,0.2);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+      color: var(--color-accent-sub);
+    }
+    .feature-icon .material-symbols-rounded { font-size: 18px; }
+    .feature-card h3 {
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 8px;
+      letter-spacing: 0.01em;
+    }
+    .feature-card p {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+    .feature-card .feature-tag {
+      display: inline-block;
+      margin-top: 14px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      background: var(--color-surface-4);
+      color: var(--color-text-tertiary);
+    }
+
+    /* ── Screenshots ─────────────────────────────────────── */
+    .screenshots-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .screenshot-item {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      transition: border-color 0.22s var(--ease-ui), transform 0.22s var(--ease-ui), box-shadow 0.22s var(--ease-ui);
+      cursor: pointer;
+    }
+    .screenshot-item:hover {
+      border-color: var(--color-border-hover);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    .screenshot-item:first-child {
+      grid-column: 1 / -1;
+    }
+    .screenshot-placeholder {
+      aspect-ratio: 16/9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: var(--color-surface-2);
+      color: var(--color-text-tertiary);
+    }
+    .screenshot-placeholder .material-symbols-rounded {
+      font-size: 32px;
+      opacity: 0.4;
+    }
+    .screenshot-placeholder span {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+    }
+    .screenshot-label {
+      padding: 14px 18px;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .screenshot-label .material-symbols-rounded {
+      font-size: 14px;
+      color: var(--color-accent-sub);
+    }
+    .screenshot-label-text {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      font-weight: 500;
+    }
+    .screenshot-label-sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-text-tertiary);
+      margin-left: auto;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Tech stack ──────────────────────────────────────── */
+    .tech-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .tech-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-pill);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .tech-pill:hover {
+      border-color: var(--color-border-hover);
+      color: var(--color-text-primary);
+    }
+    .tech-pill-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+    }
+    .tech-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    /* ── Download ────────────────────────────────────────── */
+    #download {
+      background: linear-gradient(180deg, transparent 0%, var(--color-surface-1) 100%);
+    }
+    .download-card {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: 52px 56px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 48px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .download-card::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 300px; height: 300px;
+      background: radial-gradient(ellipse, rgba(200,57,43,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .download-card h2 { margin-bottom: 10px; }
+    .download-card .section-desc { margin-bottom: 28px; }
+    .download-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .download-aside {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 220px;
+    }
+    .version-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .version-number {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+      letter-spacing: 0.08em;
+    }
+    .req-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .req-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+    .req-item .material-symbols-rounded { font-size: 15px; color: var(--color-teal); }
+
+    /* ── Donate ──────────────────────────────────────────── */
+    #support {
+      text-align: center;
+    }
+    .support-inner {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .support-inner .eyebrow { margin-bottom: 14px; }
+    .support-inner h2 { margin-bottom: 16px; }
+    .support-inner p {
+      font-size: 15px;
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+    .support-solo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 22px;
+      background: var(--color-surface-3);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 36px;
+    }
+    .support-solo .material-symbols-rounded { color: var(--color-gold); font-size: 18px; }
+    .support-solo span { font-size: 13px; color: var(--color-text-secondary); }
+    .btn-donate {
+      background: linear-gradient(135deg, #003087 0%, #009cde 100%);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: var(--radius-pill);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(0,100,220,0.3);
+    }
+    .btn-donate:hover {
+      opacity: 0.92;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,100,220,0.4);
+    }
+    .btn-donate-icon {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 400;
+      font-style: italic;
+    }
+    .support-note {
+      margin-top: 20px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Footer ──────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--color-border);
+      padding: 36px 0;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+    }
+    .footer-logo span { color: var(--color-accent); }
+    .footer-copy {
+      font-size: 12px;
+      color: var(--color-text-tertiary);
+    }
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .footer-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--color-text-tertiary);
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      transition: color 0.2s, background 0.2s;
+    }
+    .footer-link:hover {
+      color: var(--color-text-primary);
+      background: var(--color-surface-3);
+    }
+    .footer-link .material-symbols-rounded { font-size: 14px; }
+
+    /* ── Responsive ──────────────────────────────────────── */
+    @media (max-width: 860px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .tech-two-col { grid-template-columns: 1fr; gap: 40px; }
+      .download-card { grid-template-columns: 1fr; padding: 36px 28px; }
+      .download-aside { flex-direction: row; flex-wrap: wrap; }
+    }
+    @media (max-width: 640px) {
+      .container { padding: 0 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .screenshots-grid { grid-template-columns: 1fr; }
+      .screenshot-item:first-child { grid-column: unset; }
+      .nav-links .nav-link { display: none; }
+      h1 { font-size: 44px; }
+      .hero-meta { gap: 24px; }
+      .hero-divider { display: none; }
+      section { padding: 64px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navigation ─────────────────────────────────────── -->
+  <nav>
+    <div class="container nav-inner">
+      <a href="#" class="nav-logo">Velv<span>ee</span>t</a>
+      <div class="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#screenshots" class="nav-link">Screenshots</a>
+        <a href="#download" class="nav-link">Download</a>
+        <a href="#support" class="nav-link">Support</a>
+        <a href="https://github.com/YOUR_USERNAME/velveet" target="_blank" rel="noopener" class="nav-link">GitHub</a>
+        <a href="#download" class="nav-cta">
+          <span class="material-symbols-rounded">download</span>
+          Download
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ───────────────────────────────────────────── -->
+  <section id="hero">
+    <div class="hero-bg-glow"></div>
+    <div class="container hero-content">
+
+      <div class="fade-up hero-badge">
+        <span class="hero-badge-dot"></span>
+        Self-hosted · Offline · Private
+      </div>
+
+      <h1 class="fade-up fade-up-1">
+        Your media.<br/><em>Your rules.</em>
+      </h1>
+
+      <p class="hero-subtitle fade-up fade-up-2">
+        Velveet is a self-hosted media library built for collectors who value
+        privacy, organization, and a refined viewing experience — on their own hardware.
+      </p>
+
+      <div class="hero-actions fade-up fade-up-3">
+        <a href="#download" class="btn btn-primary">
+          <span class="material-symbols-rounded">download</span>
+          Download for Windows
+        </a>
+        <a href="https://github.com/YOUR_USERNAME/velveet" target="_blank" rel="noopener" class="btn btn-ghost">
+          <span class="material-symbols-rounded">code</span>
+          View on GitHub
+        </a>
+      </div>
+
+      <div class="hero-meta fade-up fade-up-4">
+        <div class="hero-stat">
+          <div class="hero-stat-value">14</div>
+          <div class="hero-stat-label">Themes</div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">100%</div>
+          <div class="hero-stat-label">Local & Private</div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">0</div>
+          <div class="hero-stat-label">Subscriptions</div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">Free</div>
+          <div class="hero-stat-label">Forever</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Features ───────────────────────────────────────── -->
+  <section id="features">
+    <div class="container">
+      <div class="section-header">
+        <p class="eyebrow">What it does</p>
+        <h2>Everything your collection deserves</h2>
+        <p class="section-desc">
+          From bulk scanning to detailed metadata, Velveet brings every corner of your library under control.
+        </p>
+      </div>
+
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <span class="material-symbols-rounded">folder_open</span>
+          </div>
+          <h3>Smart Scanning</h3>
+          <p>Point Velveet at any folder. It scans recursively, extracts codec info, resolution, duration, and generates thumbnails — automatically.</p>
+          <span class="feature-tag">FFmpeg-powered</span>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <span class="material-symbols-rounded">play_circle</span>
+          </div>
+          <h3>Built-in Player</h3>
+          <p>A clean, distraction-free video player with progress tracking. Resume where you left off, any time.</p>
+          <span class="feature-tag">Progress resume</span>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <span class="material-symbols-rounded">person</span>
+          </div>
+          <h3>Performer Profiles</h3>
+          <p>Associate performers to scenes and collections. Browse by name, see their full filmography at a glance.</p>
+          <span class="feature-tag">Metadata</span>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <span class="material-symbols-rounded">label</span>
+          </div>
+          <h3>Tags & Studios</h3>
+          <p>Organize with freeform tags and studio attribution. Filter any view by any combination.</p>
+          <span class="feature-tag">Organization</span>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <span class="material-symbols-rounded">collections</span>
+          </div>
+          <h3>Collections</h3>
+          <p>Group related media into named collections with cover art. Mix videos and images in a single cohesive gallery.</p>
+          <span class="feature-tag">Grouping</span>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <span class="material-symbols-rounded">queue_music</span>
+          </div>
+          <h3>Playlists</h3>
+          <p>Create static playlists by hand, or let smart playlists auto-populate based on filters and rules you define.</p>
+          <span class="feature-tag">Static & Smart</span>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <span class="material-symbols-rounded">bookmark</span>
+          </div>
+          <h3>Scene Markers</h3>
+          <p>Annotate any timestamp in a scene with a label. Jump directly to the moments that matter.</p>
+          <span class="feature-tag">Timestamps</span>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <span class="material-symbols-rounded">checklist</span>
+          </div>
+          <h3>Curation Workflow</h3>
+          <p>Flag scenes that need attention. Work through your backlog with a dedicated curation queue that tracks your progress.</p>
+          <span class="feature-tag">Workflow</span>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <span class="material-symbols-rounded">palette</span>
+          </div>
+          <h3>14 Themes</h3>
+          <p>Crimson, Midnight, Forest, Amethyst, Ember, Ocean and eight more. Every theme is hand-tuned, not just a tint swap.</p>
+          <span class="feature-tag">Personalization</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Screenshots ────────────────────────────────────── -->
+  <section id="screenshots">
+    <div class="container">
+      <div class="section-header">
+        <p class="eyebrow">See it in action</p>
+        <h2>Crafted for the long sessions</h2>
+        <p class="section-desc">
+          A UI that stays out of your way — until you need it.
+        </p>
+      </div>
+
+      <div class="screenshots-grid">
+
+        <!-- Wide hero screenshot -->
+        <div class="screenshot-item">
+          <img src="screenshots/home.png" />
+          <div class="screenshot-label">
+            <span class="material-symbols-rounded">home</span>
+            <span class="screenshot-label-text">Home — Dashboard &amp; KPIs</span>
+            <span class="screenshot-label-sub">featured · continue watching · stats</span>
+          </div>
+        </div>
+
+        <div class="screenshot-item">
+          <div class="screenshot-placeholder">
+            <img src="screenshots/scenes.png" />
+          </div>
+          <div class="screenshot-label">
+            <span class="material-symbols-rounded">movie</span>
+            <span class="screenshot-label-text">Scenes Gallery</span>
+            <span class="screenshot-label-sub">browse · filter · sort</span>
+          </div>
+        </div>
+
+        <div class="screenshot-item">
+          <img src="screenshots/scene-player.png" />
+          <div class="screenshot-label">
+            <span class="material-symbols-rounded">play_circle</span>
+            <span class="screenshot-label-text">Video Player</span>
+            <span class="screenshot-label-sub">markers · progress · metadata</span>
+          </div>
+        </div>
+
+        <div class="screenshot-item">
+          <img src="screenshots/scene-details.png" />
+          <div class="screenshot-label">
+            <span class="material-symbols-rounded">info</span>
+            <span class="screenshot-label-text">Scene Detail</span>
+            <span class="screenshot-label-sub">performers · tags · studio · markers</span>
+          </div>
+        </div>
+
+        <div class="screenshot-item">
+          <img src="screenshots/performers.png" />
+          <div class="screenshot-label">
+            <span class="material-symbols-rounded">person</span>
+            <span class="screenshot-label-text">Performers Gallery</span>
+            <span class="screenshot-label-sub">filmography · collections · stats</span>
+          </div>
+        </div>
+
+        <div class="screenshot-item">
+          <img src="screenshots/performer.png" />
+          <div class="screenshot-label">
+            <span class="material-symbols-rounded">person</span>
+            <span class="screenshot-label-text">Performer Profile</span>
+            <span class="screenshot-label-sub">filmography · collections · stats</span>
+          </div>
+        </div>
+
+        <div class="screenshot-item">
+          <img src="screenshots/collections.png" />
+          <div class="screenshot-label">
+            <span class="material-symbols-rounded">photo_library</span>
+            <span class="screenshot-label-text">Collections Gallery</span>
+            <span class="screenshot-label-sub">images · videos · vizualizer</span>
+          </div>
+        </div>
+
+        <div class="screenshot-item">
+          <img src="screenshots/collection.png" />
+          <div class="screenshot-label">
+            <span class="material-symbols-rounded">photo_library</span>
+            <span class="screenshot-label-text">Collection</span>
+            <span class="screenshot-label-sub">images · videos · vizualizer</span>
+          </div>
+        </div>
+
+        <div class="screenshot-item">
+          <img src="screenshots/settings.png" />
+          <div class="screenshot-label">
+            <span class="material-symbols-rounded">settings</span>
+            <span class="screenshot-label-text">Settings &amp; Themes</span>
+            <span class="screenshot-label-sub">14 themes · scan · preferences</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Stack ───────────────────────────────────────────── -->
+  <section id="stack">
+    <div class="container">
+      <div class="tech-two-col">
+        <div>
+          <p class="eyebrow" style="margin-bottom:12px">Built to last</p>
+          <h2>Solid stack,<br/>no cloud dependency</h2>
+          <p class="section-desc" style="margin-bottom:0">
+            Velveet runs entirely on your machine. No account, no telemetry,
+            no subscription. A local SQLite database, a lightweight Node.js
+            server, and a React front-end served at <code style="font-family:var(--font-mono);font-size:13px;color:var(--color-accent-sub)">localhost</code>.
+          </p>
+          <div class="tech-grid">
+            <span class="tech-pill"><span class="tech-pill-dot" style="background:#61dafb"></span>React</span>
+            <span class="tech-pill"><span class="tech-pill-dot" style="background:#3178c6"></span>TypeScript</span>
+            <span class="tech-pill"><span class="tech-pill-dot" style="background:#f0db4f"></span>Node.js</span>
+            <span class="tech-pill"><span class="tech-pill-dot" style="background:#5a67d8"></span>Prisma / SQLite</span>
+            <span class="tech-pill"><span class="tech-pill-dot" style="background:#00b894"></span>FFmpeg</span>
+            <span class="tech-pill"><span class="tech-pill-dot" style="background:#764abc"></span>Redux Toolkit</span>
+            <span class="tech-pill"><span class="tech-pill-dot" style="background:#c8392b"></span>SCSS Design System</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:22px 24px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <span class="material-symbols-rounded" style="color:var(--color-teal);font-size:18px">lock</span>
+              <span style="font-size:13px;font-weight:600;color:var(--color-text-primary)">100% local</span>
+            </div>
+            <p style="font-size:13px;color:var(--color-text-secondary)">All data stays on your machine. Nothing is sent anywhere, ever.</p>
+          </div>
+          <div style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:22px 24px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <span class="material-symbols-rounded" style="color:var(--color-gold);font-size:18px">speed</span>
+              <span style="font-size:13px;font-weight:600;color:var(--color-text-primary)">Fast & responsive</span>
+            </div>
+            <p style="font-size:13px;color:var(--color-text-secondary)">Local network speeds. No buffering, no CDN latency, no throttling.</p>
+          </div>
+          <div style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:22px 24px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <span class="material-symbols-rounded" style="color:var(--color-accent-sub);font-size:18px">source</span>
+              <span style="font-size:13px;font-weight:600;color:var(--color-text-primary)">Open source</span>
+            </div>
+            <p style="font-size:13px;color:var(--color-text-secondary)">MIT licensed. Inspect, fork, or contribute on GitHub.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Download ───────────────────────────────────────── -->
+  <section id="download">
+    <div class="container">
+      <div class="download-card">
+        <div>
+          <p class="eyebrow" style="margin-bottom:14px">Get started</p>
+          <h2>Download Velveet</h2>
+          <p class="section-desc">
+            Grab the latest release, unzip, and run. No installer, no admin rights required.
+            Works on Windows 10/11 with Node.js 20+.
+          </p>
+          <div class="download-actions">
+            <a href="https://github.com/YOUR_USERNAME/velveet/releases/latest" target="_blank" rel="noopener" class="btn btn-primary">
+              <span class="material-symbols-rounded">download</span>
+              Download latest release
+            </a>
+            <a href="https://github.com/YOUR_USERNAME/velveet/releases" target="_blank" rel="noopener" class="btn btn-ghost">
+              <span class="material-symbols-rounded">history</span>
+              All releases
+            </a>
+          </div>
+        </div>
+        <div class="download-aside">
+          <div class="version-info">
+            <span class="eyebrow">Latest</span>
+            <span class="version-number">v1.0.0 · Windows</span>
+          </div>
+          <div class="req-list">
+            <div class="req-item">
+              <span class="material-symbols-rounded">check_circle</span>
+              <span>Windows 10 / 11</span>
+            </div>
+            <div class="req-item">
+              <span class="material-symbols-rounded">check_circle</span>
+              <span>Node.js 20+</span>
+            </div>
+            <div class="req-item">
+              <span class="material-symbols-rounded">check_circle</span>
+              <span>FFmpeg (bundled)</span>
+            </div>
+            <div class="req-item">
+              <span class="material-symbols-rounded">check_circle</span>
+              <span>~200 MB disk space</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Support ─────────────────────────────────────────── -->
+  <section id="support">
+    <div class="container">
+      <div class="support-inner">
+        <p class="eyebrow">Support the project</p>
+        <h2>Made by one person,<br/>for the love of it</h2>
+
+        <div class="support-solo">
+          <span class="material-symbols-rounded">person</span>
+          <span>Designed, built, and maintained solo — out of pocket</span>
+        </div>
+
+        <p>
+          Velveet is a passion project. I design it, write every line of code, run
+          the infrastructure, and ship updates — all on my own time and at my own
+          expense. It will always be free. But if it saves you money on a subscription
+          or simply brings you joy, a small donation means a lot and helps keep the
+          lights on.
+        </p>
+
+        <a href="https://paypal.me/YOUR_PAYPAL" target="_blank" rel="noopener" class="btn-donate">
+          <span class="btn-donate-icon">P</span>
+          Donate via PayPal
+        </a>
+
+        <p class="support-note">Any amount is appreciated. No account needed.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ─────────────────────────────────────────── -->
+  <footer>
+    <div class="container footer-inner">
+      <div class="footer-logo">Velv<span>ee</span>t</div>
+      <span class="footer-copy">© 2026 — Made with care, served locally.</span>
+      <div class="footer-links">
+        <a href="https://github.com/YOUR_USERNAME/velveet" target="_blank" rel="noopener" class="footer-link">
+          <span class="material-symbols-rounded">code</span>
+          GitHub
+        </a>
+        <a href="#download" class="footer-link">
+          <span class="material-symbols-rounded">download</span>
+          Download
+        </a>
+        <a href="#support" class="footer-link">
+          <span class="material-symbols-rounded">favorite</span>
+          Donate
+        </a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
